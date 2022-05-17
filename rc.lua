@@ -53,6 +53,18 @@ local run_on_start_up = {
 -- Initialization
 -- ===================================================================
 
+-- reload screen
+awful.spawn.easy_async_with_shell("xrdb -get awesome.started", function(stdout)
+	local tokens = {}
+	for token in string.gmatch(stdout, "[^\r\n]+") do
+		table.insert(tokens, token)
+	end
+	if #tokens == 0 or tokens[1] == "false" then
+		awful.spawn.with_shell("xrdb -override <<<'awesome.started:true'")
+		awful.spawn.with_shell("autorandr --change --skip-option crtc")
+	end
+end)
+
 -- Import notification appearance
 require("components.notifications")
 
