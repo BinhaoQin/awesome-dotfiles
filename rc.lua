@@ -31,15 +31,7 @@ apps = {
 	lock = "i3lock-fancy",
 	screenshot = "scrot -e 'mv $f ~/Pictures/ 2>/dev/null'",
 	filebrowser = "thunar",
-}
-
-local shell = "zsh"
-
--- define wireless and ethernet interface names for the network widget
--- use `ip link` command to determine these
-network_interfaces = {
-	wlan = "wlan0",
-	lan = "enp1s0",
+	shell = "zsh",
 }
 
 -- List of apps to run on start-up
@@ -53,18 +45,6 @@ local run_on_start_up = {
 -- Initialization
 -- ===================================================================
 
--- reload screen
-awful.spawn.easy_async_with_shell("xrdb -get awesome.started", function(stdout)
-	local tokens = {}
-	for token in string.gmatch(stdout, "[^\r\n]+") do
-		table.insert(tokens, token)
-	end
-	if #tokens == 0 or tokens[1] == "false" then
-		awful.spawn.with_shell("xrdb -override <<<'awesome.started:true'")
-		awful.spawn.with_shell("autorandr --change --skip-option crtc")
-	end
-end)
-
 -- Import notification appearance
 require("components.notifications")
 
@@ -77,7 +57,7 @@ for _, app in ipairs(run_on_start_up) do
 	end
 	-- pipe commands to bash to allow command to be shell agnostic
 	awful.spawn.with_shell(
-		string.format("echo 'pgrep -u $USER -x %s > /dev/null || (%s)' | " .. shell .. " -", findme, app),
+		string.format("echo 'pgrep -u $USER -x %s > /dev/null || (%s)' | " .. apps.shell .. " -", findme, app),
 		false
 	)
 end
@@ -161,4 +141,3 @@ awful.screen.set_auto_dpi_enabled(true)
 -- auto startup
 awful.spawn.with_shell("ibus-daemon -drx")
 awful.spawn("xss-lock --transfer-sleep-lock -- i3lock-fancy", false)
-awful.spawn("thunderbird", false)

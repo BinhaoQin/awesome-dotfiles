@@ -19,6 +19,8 @@ local dpi = beautiful.xresources.apply_dpi
 local modkey = "Mod4"
 local altkey = "Mod1"
 
+local system = require("system")
+
 -- define module table
 local keys = {}
 
@@ -134,35 +136,6 @@ keys.clientbuttons = gears.table.join(
 -- Desktop Key bindings
 -- ===================================================================
 
-local backlight_controllers = {}
-
-local backlight_control = function(control)
-	local command = "xbacklight -ctrl %s " .. control
-	for _, controller in ipairs(backlight_controllers) do
-		awful.spawn(string.format(command, controller), false)
-	end
-end
-
-local volume_control = function(control)
-	local command = "amixer -D pulse " .. control .. " | grep 'Right: ' | awk -F '[][]' '{print $2 $4}'"
-	awful.spawn.easy_async_with_shell(command, function(stdout)
-		local tokens = {}
-		for token in string.gmatch(stdout, "[^%%%s]+") do
-			table.insert(tokens, token)
-		end
-		local volume = tonumber(tokens[1])
-		local status = tostring(tokens[2])
-		awesome.emit_signal("volume_change", volume, status)
-	end)
-end
-
-awful.spawn.easy_async_with_shell("ls /sys/class/backlight", function(stdout)
-	for token in string.gmatch(stdout, "[^%s]+") do
-		table.insert(backlight_controllers, token)
-	end
-	backlight_control("-set 80")
-end)
-
 keys.globalkeys = gears.table.join(
 	-- =========================================
 	-- SPAWN APPLICATION KEY BINDINGS
@@ -183,21 +156,21 @@ keys.globalkeys = gears.table.join(
 
 	-- Brightness
 	awful.key({}, "XF86MonBrightnessUp", function()
-		backlight_control("-inc 10")
+		system.backlights.increase(10)
 	end, { description = "+10%", group = "hotkeys" }),
 	awful.key({}, "XF86MonBrightnessDown", function()
-		backlight_control("-dec 10")
+		system.backlights.decrease(10)
 	end, { description = "-10%", group = "hotkeys" }),
 
 	-- ALSA volume control
 	awful.key({}, "XF86AudioRaiseVolume", function()
-		volume_control("sset Master 5%+")
+		system.audio.increase(5)
 	end, { description = "volume up", group = "hotkeys" }),
 	awful.key({}, "XF86AudioLowerVolume", function()
-		volume_control("sset Master 5%-")
+		system.audio.decrease(5)
 	end, { description = "volume down", group = "hotkeys" }),
 	awful.key({}, "XF86AudioMute", function()
-		volume_control("set Master 1+ toggle")
+		system.audio.toggle()
 	end, { description = "toggle mute", group = "hotkeys" }),
 	awful.key({}, "XF86AudioNext", function()
 		awful.spawn("mpc next", false)
