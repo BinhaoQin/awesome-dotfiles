@@ -27,7 +27,7 @@ local exit_screen = {}
 
 local icon_size = dpi(90)
 
-local build_button = function(icon)
+local build_button = function(icon, text)
 	local button = wibox.widget({
 		wibox.widget({
 			wibox.widget({
@@ -58,7 +58,7 @@ end
 -- Functionality
 -- ===================================================================
 
-local exit_screen_grabber
+local exit_screen_grabber = nil
 
 local function suspend_command()
 	exit_screen.hide()
@@ -72,8 +72,7 @@ end
 
 local function lock_command()
 	exit_screen.hide()
-	--awful.spawn.with_shell("sleep 1 && " .. apps.lock)
-	awful.spawn.with_shell("systemctl suspend")
+	awful.spawn.with_shell("sleep 1 && " .. apps.lock)
 end
 
 local function poweroff_command()
